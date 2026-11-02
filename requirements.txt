@@ -1,0 +1,4 @@
+requests>=2.31
+markdownify>=0.13
+beautifulsoup4>=4.12
+python-dotenv>=1.0

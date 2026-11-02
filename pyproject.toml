@@ -1,0 +1,8 @@
+[project]
+name = "integrator-rag"
+version = "0.1.0"
+description = "Confluence -> Markdown exporter for the Integrator RAG pilot"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
