@@ -86,10 +86,27 @@ class ConfluenceClient:
         ):
             yield p["id"]
 
+    MAX_DESCENDANT_DEPTH = 5  # API maximum per call
+
     def iter_descendant_page_ids(self, page_id: str) -> Iterator[str]:
-        for d in self._paginate(f"{self.wiki}/api/v2/pages/{page_id}/descendants"):
-            if d.get("type", "page") == "page":
-                yield d["id"]
+        """All pages under page_id at any depth (root not included).
+
+        The descendants endpoint only goes 5 levels deep per call, so items at the
+        deepest level are queried again to continue down the tree.
+        """
+        seen: set[str] = set()
+        queue = [page_id]
+        while queue:
+            root = queue.pop(0)
+            for d in self._paginate(f"{self.wiki}/api/v2/pages/{root}/descendants",
+                                    {"depth": self.MAX_DESCENDANT_DEPTH}):
+                if d["id"] in seen:
+                    continue
+                seen.add(d["id"])
+                if d.get("type", "page") == "page":
+                    yield d["id"]
+                if d.get("depth", 0) >= self.MAX_DESCENDANT_DEPTH and d.get("type", "page") == "page":
+                    queue.append(d["id"])
 
     # ---- Spaces / users -------------------------------------------------
     def get_space_by_key(self, key: str) -> dict:

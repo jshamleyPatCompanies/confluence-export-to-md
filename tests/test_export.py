@@ -78,3 +78,25 @@ def test_export_writes_then_skips_then_rewrites_on_rename(tmp_path):
     assert (tmp_path / "IE" / "writebacks-mvp-3390078977.md").exists()
     state = json.loads((tmp_path / ".export-state.json").read_text())
     assert state["3390078977"]["version"] == 2
+
+
+def test_tree_goes_deeper_than_api_depth_limit():
+    from confluence_export.client import ConfluenceClient
+
+    # Linear chain 1 -> 2 -> ... -> 12; the API returns at most 5 levels per call.
+    class Chain(ConfluenceClient):
+        def __init__(self):
+            pass
+
+        def _paginate(self, url, params=None):
+            root = int(url.split("/pages/")[1].split("/")[0])
+            depth = params["depth"]
+            for lvl in range(1, depth + 1):
+                child = root + lvl
+                if child <= 12:
+                    yield {"id": str(child), "type": "page", "depth": lvl}
+
+        wiki = "https://x/wiki"
+
+    ids = list(Chain().iter_descendant_page_ids("1"))
+    assert ids == [str(i) for i in range(2, 13)]
