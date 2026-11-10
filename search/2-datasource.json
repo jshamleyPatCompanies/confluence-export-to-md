@@ -1,0 +1,6 @@
+{
+  "name": "integrator-rag-ds",
+  "type": "azureblob",
+  "credentials": { "connectionString": "<STORAGE-CONNECTION-STRING>" },
+  "container": { "name": "integrator-rag-files" }
+}

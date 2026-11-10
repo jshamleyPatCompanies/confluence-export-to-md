@@ -1,0 +1,13 @@
+{
+  "name": "integrator-rag-ixr",
+  "dataSourceName": "integrator-rag-ds",
+  "targetIndexName": "integrator-rag-idx",
+  "skillsetName": "integrator-rag-ss",
+  "parameters": {
+    "configuration": {
+      "dataToExtract": "contentAndMetadata",
+      "indexedFileNameExtensions": ".md"
+    }
+  },
+  "schedule": { "interval": "PT1H" }
+}

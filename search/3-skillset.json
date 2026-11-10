@@ -1,0 +1,42 @@
+{
+  "name": "integrator-rag-ss",
+  "skills": [
+    {
+      "@odata.type": "#Microsoft.Skills.Text.SplitSkill",
+      "name": "split",
+      "context": "/document",
+      "textSplitMode": "pages",
+      "maximumPageLength": 2000,
+      "pageOverlapLength": 200,
+      "inputs": [ { "name": "text", "source": "/document/content" } ],
+      "outputs": [ { "name": "textItems", "targetName": "pages" } ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.AzureOpenAIEmbeddingSkill",
+      "name": "embed",
+      "context": "/document/pages/*",
+      "resourceUri": "https://<OPENAI-RESOURCE>.openai.azure.com",
+      "deploymentId": "<EMBEDDING-DEPLOYMENT-NAME>",
+      "modelName": "text-embedding-3-small",
+      "dimensions": 1536,
+      "apiKey": "<OPENAI-KEY>",
+      "inputs": [ { "name": "text", "source": "/document/pages/*" } ],
+      "outputs": [ { "name": "embedding", "targetName": "text_vector" } ]
+    }
+  ],
+  "indexProjections": {
+    "selectors": [
+      {
+        "targetIndexName": "integrator-rag-idx",
+        "parentKeyFieldName": "parent_id",
+        "sourceContext": "/document/pages/*",
+        "mappings": [
+          { "name": "chunk", "source": "/document/pages/*" },
+          { "name": "text_vector", "source": "/document/pages/*/text_vector" },
+          { "name": "title", "source": "/document/metadata_storage_name" }
+        ]
+      }
+    ],
+    "parameters": { "projectionMode": "skipIndexingParentDocuments" }
+  }
+}

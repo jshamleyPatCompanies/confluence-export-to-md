@@ -1,0 +1,40 @@
+{
+  "name": "integrator-rag-idx",
+  "fields": [
+    { "name": "chunk_id", "type": "Edm.String", "key": true, "searchable": true, "filterable": false, "sortable": true, "facetable": false, "analyzer": "keyword" },
+    { "name": "parent_id", "type": "Edm.String", "searchable": false, "filterable": true },
+    { "name": "title", "type": "Edm.String", "searchable": true, "filterable": true },
+    { "name": "chunk", "type": "Edm.String", "searchable": true },
+    {
+      "name": "text_vector", "type": "Collection(Edm.Single)", "searchable": true, "retrievable": false,
+      "dimensions": 1536, "vectorSearchProfile": "vprofile"
+    }
+  ],
+  "vectorSearch": {
+    "algorithms": [ { "name": "hnsw", "kind": "hnsw" } ],
+    "profiles": [ { "name": "vprofile", "algorithm": "hnsw", "vectorizer": "aoai" } ],
+    "vectorizers": [
+      {
+        "name": "aoai",
+        "kind": "azureOpenAI",
+        "azureOpenAIParameters": {
+          "resourceUri": "https://<OPENAI-RESOURCE>.openai.azure.com",
+          "deploymentId": "<EMBEDDING-DEPLOYMENT-NAME>",
+          "modelName": "text-embedding-3-small",
+          "apiKey": "<OPENAI-KEY>"
+        }
+      }
+    ]
+  },
+  "semantic": {
+    "configurations": [
+      {
+        "name": "sem",
+        "prioritizedFields": {
+          "titleField": { "fieldName": "title" },
+          "prioritizedContentFields": [ { "fieldName": "chunk" } ]
+        }
+      }
+    ]
+  }
+}
